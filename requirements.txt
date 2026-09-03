@@ -1,0 +1,12 @@
+# Pinned to the second-pass run set (T4 + 5060). See docs/THESIS_MASTER_CONTEXT.md §5.1.
+torch>=2.11
+transformers>=5.15
+peft>=0.20.0
+torchao          # peft's version check crashes without this
+datasets
+evaluate
+accelerate
+numpy
+pandas
+# csebuetnlp normalizer — install from git per the notebook:
+#   pip install git+https://github.com/csebuetnlp/normalizer
