@@ -1,0 +1,13 @@
+{
+  "run_id": "lora_frac0.01_seed42",
+  "method": "lora",
+  "fraction": 0.01,
+  "seed": 42,
+  "step": 1912,
+  "epoch": 8.0,
+  "elapsed_min": 2.29,
+  "last_eval_f1": -1.0,
+  "best_f1_so_far": 0.7182973221626446,
+  "gpu": "NVIDIA A100-SXM4-40GB",
+  "updated_utc": "2026-09-04T18:32:51Z"
+}
