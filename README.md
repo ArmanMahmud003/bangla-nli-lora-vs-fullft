@@ -27,7 +27,7 @@ Two additional findings from the same runs:
 - **The two methods converge on completely different schedules at 5%**: full fine-tuning
   peaks by epoch 3 and then decays; LoRA peaks at epoch 6 or later — no overlap across seeds.
 
-See [`docs/THESIS_MASTER_CONTEXT.md`](docs/THESIS_MASTER_CONTEXT.md) for the full write-up
+See [`docs/THESIS_MASTER_CONTEXT_v2.md`](docs/THESIS_MASTER_CONTEXT_v2.md) for the full write-up
 with every number, method, and caveat.
 
 ---
@@ -74,7 +74,7 @@ bangla-nli-lora-vs-fullft/
 │   ├── step10_train_with_test.py              ← the real trainer (shared with the notebook)
 │   └── step11_analysis.py                     ← test tables, significance tests, figures
 ├── docs/
-│   └── THESIS_MASTER_CONTEXT.md                ← full write-up + every number
+│   └── THESIS_MASTER_CONTEXT_v2.md             ← full write-up + every number
 └── step10_artifacts/                          ← the 20-run evidence base
     ├── results_v2.csv                         ← one row per run, source of the tables below
     ├── runs/<id>.json                         ← one manifest per run
@@ -153,9 +153,8 @@ agree, Cohen's dz = −12.1. At 5% the effect is gone (p = 0.45).
 | 0.01 | 5, 5, 7, 8, 8 (mean 6.6) | 7, 7, 8, 8, 8 (mean 7.6) | +1.0 | 3 later, 2 tied |
 | 0.05 | 1, 2, 2, 3, 3 | 6, 6, 6, 6, 7 | **+4.0** | **5 of 5, p = 0.0002** |
 
-Full details, per-seed numbers, prediction-agreement (§5.7), validation-vs-test comparison
-(§5.8), seed-spread caveats (§5.9), and the abandoned first-pass numbers (§7) are all in
-[`docs/THESIS_MASTER_CONTEXT.md`](docs/THESIS_MASTER_CONTEXT.md).
+Full details, per-seed numbers, and caveats are in
+[`docs/THESIS_MASTER_CONTEXT_v2.md`](docs/THESIS_MASTER_CONTEXT_v2.md).
 
 ---
 
