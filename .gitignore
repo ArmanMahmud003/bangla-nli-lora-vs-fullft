@@ -41,7 +41,6 @@ ENV/
 *.msgpack
 *.h5
 *.tflite
-runs/
 checkpoints/
 outputs/
 wandb/
@@ -49,18 +48,15 @@ wandb/
 # Data + results dumps
 *.parquet
 *.arrow
-*.npz
 *.npy
 data/
 datasets/
 thesis_runs_*.zip
-preds/
-curves_v2/
-results_v2*.csv
 
 # OS / editors
 .DS_Store
 Thumbs.db
+desktop.ini
 .vscode/
 .idea/
 *.swp

@@ -69,18 +69,30 @@ bangla-nli-lora-vs-fullft/
 ├── requirements.txt
 ├── notebooks/
 │   └── Step10_retrain_ColabA100.ipynb         ← end-to-end trainer (A100 / bf16)
-└── docs/
-    └── THESIS_MASTER_CONTEXT.md               ← full write-up + every number
+├── scripts/
+│   ├── step3_data.py                          ← data loading, normalisation, tokenisation
+│   ├── step10_train_with_test.py              ← the real trainer (shared with the notebook)
+│   └── step11_analysis.py                     ← test tables, significance tests, figures
+├── docs/
+│   └── THESIS_MASTER_CONTEXT.md                ← full write-up + every number
+└── step10_artifacts/                          ← the 20-run evidence base
+    ├── results_v2.csv                         ← one row per run, source of the tables below
+    ├── runs/<id>.json                         ← one manifest per run
+    ├── curves_v2/<id>.json                    ← per-epoch dev curves
+    └── preds/<id>_test.npz                    ← per-example test logits
 ```
 
 The notebook is the current, correct pipeline: matched 8-epoch ceiling, no early stopping,
 test scored **inside** each run right after the dev-best checkpoint is restored, per-example
 test logits saved, efficiency logged (trainable parameters, wall-clock, peak GPU memory,
-artefact size, library versions, GPU name).
+artefact size, library versions, GPU name). `scripts/step10_train_with_test.py` and
+`scripts/step3_data.py` are the exact modules the notebook runs; `scripts/step11_analysis.py`
+reads `step10_artifacts/runs/*.json` + `preds/*.npz` and produces the tables and figures below.
 
-Additional first-pass and analysis scripts (`step3_data.py`, `step11_analysis.py`,
-`run_all_3070.py`, `check_progress.py`, `review_evidence{,2,3}.py`, `factcheck*.py`,
-`dump_tables.py`) live outside this repo and will be added as they are cleaned for release.
+The 3070-specific orchestration (`run_all_3070.py`, `check_progress.py`), the Colab-recovery
+utility `merge_zip.py`, and the superseded first-pass eval (`step9_test_eval.py`,
+`step9b_equal_budget.py`) were not part of producing the delivered 20 runs and are not
+included here.
 
 ---
 

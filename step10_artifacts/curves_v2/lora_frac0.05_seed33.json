@@ -1,0 +1,82 @@
+[
+  {
+    "eval_loss": 0.6620410680770874,
+    "eval_accuracy": 0.7391484084332369,
+    "eval_f1_macro": 0.7387481065256224,
+    "eval_runtime": 1.545,
+    "eval_samples_per_second": 1565.703,
+    "eval_steps_per_second": 24.596,
+    "epoch": 1.0,
+    "step": 1192
+  },
+  {
+    "eval_loss": 0.613112211227417,
+    "eval_accuracy": 0.7598181066556429,
+    "eval_f1_macro": 0.7607378167161093,
+    "eval_runtime": 1.5613,
+    "eval_samples_per_second": 1549.302,
+    "eval_steps_per_second": 24.338,
+    "epoch": 2.0,
+    "step": 2384
+  },
+  {
+    "eval_loss": 0.610599935054779,
+    "eval_accuracy": 0.756924348904506,
+    "eval_f1_macro": 0.7588516667865415,
+    "eval_runtime": 1.5582,
+    "eval_samples_per_second": 1552.402,
+    "eval_steps_per_second": 24.387,
+    "epoch": 3.0,
+    "step": 3576
+  },
+  {
+    "eval_loss": 0.5958885550498962,
+    "eval_accuracy": 0.7656056221579165,
+    "eval_f1_macro": 0.7667702923463292,
+    "eval_runtime": 1.5208,
+    "eval_samples_per_second": 1590.597,
+    "eval_steps_per_second": 24.987,
+    "epoch": 4.0,
+    "step": 4768
+  },
+  {
+    "eval_loss": 0.6566340327262878,
+    "eval_accuracy": 0.7618850764778834,
+    "eval_f1_macro": 0.7629792936608478,
+    "eval_runtime": 1.4957,
+    "eval_samples_per_second": 1617.316,
+    "eval_steps_per_second": 25.406,
+    "epoch": 5.0,
+    "step": 5960
+  },
+  {
+    "eval_loss": 0.6149941086769104,
+    "eval_accuracy": 0.7718065316246383,
+    "eval_f1_macro": 0.7725768847776933,
+    "eval_runtime": 1.5317,
+    "eval_samples_per_second": 1579.28,
+    "eval_steps_per_second": 24.809,
+    "epoch": 6.0,
+    "step": 7152
+  },
+  {
+    "eval_loss": 0.630450427532196,
+    "eval_accuracy": 0.767259198015709,
+    "eval_f1_macro": 0.768672918228813,
+    "eval_runtime": 1.534,
+    "eval_samples_per_second": 1576.973,
+    "eval_steps_per_second": 24.773,
+    "epoch": 7.0,
+    "step": 8344
+  },
+  {
+    "eval_loss": 0.6316689848899841,
+    "eval_accuracy": 0.7759404712691195,
+    "eval_f1_macro": 0.777186266121714,
+    "eval_runtime": 1.4964,
+    "eval_samples_per_second": 1616.548,
+    "eval_steps_per_second": 25.394,
+    "epoch": 8.0,
+    "step": 9536
+  }
+]
