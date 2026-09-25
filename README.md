@@ -18,9 +18,11 @@ Every number below is recomputed from the shipped artifacts by
 ## Headline result
 
 **No measurable accuracy difference between LoRA and full fine-tuning at any of the three data
-sizes** (test macro-F1 gaps of +0.0010 to +0.0024, every 95% CI spans zero). Equivalence
-(TOST, margin ±0.0068 macro-F1) is shown at 1% and 10%. At 5% it is **not** shown at that
-margin: the 90% CI reaches +0.0100, driven by full fine-tuning's larger seed spread.
+sizes** (test macro-F1 gaps of +0.0010 to +0.0024, every 95% CI spans zero and lies
+within ±0.0125). No equivalence margin was fixed before the experiment, so no formal
+equivalence (TOST) claim is made; the 90% CIs would support margins of ±0.0059 (1%),
+±0.0100 (5%) and ±0.0065 (10%). Swapping six replaced runs back in (see
+[Replaced runs](#replaced-runs)) does not change this conclusion.
 
 LoRA reaches this while training **0.80% of the parameters** (887,811 of 110,619,651),
 shipping a **124× smaller artefact** (3.57 MB vs 442.51 MB), and using **25% less peak GPU
@@ -98,12 +100,13 @@ bangla-nli-lora-vs-fullft/
 │   ├── step3_data.py                          data loading, normalisation, tokenisation
 │   ├── step10_train_with_test.py              training engine (= notebook cell 4), runs standalone
 │   ├── step11_analysis.py                     notebook cell 9: tables, McNemar, bootstrap, efficiency
-│   └── step12_paper_stats.py                  every README number: TOST, Holm, ECE, temperature scaling
+│   └── step12_paper_stats.py                  every README number: CIs, Holm, ECE, temperature scaling, replaced-run check
 ├── figures/                                   written by step12
 ├── docs/
 │   └── stats_output.txt                       full output of step12 on the shipped artifacts
 └── step10_artifacts/                          the 30-run evidence base
     ├── results_v2.csv                         one row per run
+    ├── superseded_runs.csv                    the 6 second-pass runs the A100 re-runs replaced
     ├── runs/<id>.json                         one manifest per run
     ├── curves_v2/<id>.json                    per-epoch dev curves
     └── preds/<id>_test.npz                    per-example test logits + labels
@@ -160,17 +163,21 @@ peak memory are **never** pooled across GPUs.
 
 ## Results (30 runs, 5 seeds per cell)
 
-**Accuracy: no measurable difference; equivalence shown at 1% and 10%:**
+**Accuracy: no measurable difference at any fraction:**
 
-| Fraction | Full FT (test macro-F1) | LoRA (test macro-F1) | Gap (LoRA − full) | 95% CI | Paired p | TOST ±0.0068 |
+| Fraction | Full FT (test macro-F1) | LoRA (test macro-F1) | Gap (LoRA − full) | 95% CI | Paired p | Smallest margin the 90% CI supports |
 |---|---|---|---|---|---|---|
-| 0.01 (3,814 examples)  | 0.7172 (sd 0.0034) | 0.7183 (sd 0.0080) | +0.0010 | [−0.0054, +0.0074] | 0.685 | equivalent |
-| 0.05 (19,072 examples) | 0.7683 (sd 0.0072) | 0.7706 (sd 0.0019) | +0.0024 | [−0.0076, +0.0123] | 0.547 | **not shown** (needs ±0.0100) |
-| 0.10 (38,144 examples) | 0.7842 (sd 0.0027) | 0.7851 (sd 0.0044) | +0.0010 | [−0.0062, +0.0082] | 0.728 | equivalent |
+| 0.01 (3,814 examples)  | 0.7172 (sd 0.0034) | 0.7183 (sd 0.0080) | +0.0010 | [−0.0054, +0.0074] | 0.685 | ±0.0059 |
+| 0.05 (19,072 examples) | 0.7683 (sd 0.0072) | 0.7706 (sd 0.0019) | +0.0024 | [−0.0076, +0.0123] | 0.547 | ±0.0100 |
+| 0.10 (38,144 examples) | 0.7842 (sd 0.0027) | 0.7851 (sd 0.0044) | +0.0010 | [−0.0062, +0.0082] | 0.728 | ±0.0065 |
 
-The ±0.0068 margin is the largest macro-F1 drift seen when 6 configurations were re-run
-under identical settings. Those re-runs are not in this repo, so the margin itself cannot be
-re-derived from the shipped artifacts; `--margin` on `step12_paper_stats.py` tests others.
+The last column is descriptive. It is not a TOST result, because no margin was specified
+before the data were seen. Running TOST requires a margin justified independently of these
+results (`--margin` on `step12_paper_stats.py`). An earlier version of this README used
+±0.0068, which was the largest drift among the six replaced runs below. That is post hoc,
+derived from runs inside the comparison, and measures a change of GPU and library stack
+rather than re-run noise, so it is withdrawn.
+
 Per-seed McNemar: 1 of 15 tests reaches p < 0.05 (5%, seed 42), and none survives Holm
 correction.
 
@@ -215,13 +222,49 @@ protocol, not a demonstrated property of low-rank adaptation.
 right where LoRA is wrong on 1,703 items and the reverse on 1,728. These are errors that
 cancel out to the same score.
 
+### Replaced runs
+
+Six runs in the delivered grid are A100 re-runs that replaced earlier second-pass runs of the
+same configuration: the 1% seed-42 pilot pair (originally on a T4) and the two 5% pairs
+for seeds 21 and 33 (originally on a local RTX 5060). The originals' test macro-F1 is in
+[`step10_artifacts/superseded_runs.csv`](step10_artifacts/superseded_runs.csv). Their
+manifests and logits are not shipped, so only the accuracy table can be checked against them.
+
+| Run | Original | A100 re-run | Change |
+|---|---|---|---|
+| full_ft 1% seed 42 | 0.7235 (T4, transformers 5.15.0) | 0.7170 | −0.0065 |
+| lora 1% seed 42 | 0.7222 (T4, transformers 5.15.0) | 0.7225 | +0.0003 |
+| full_ft 5% seed 21 | 0.7707 (5060, transformers 5.16.1) | 0.7746 | +0.0039 |
+| full_ft 5% seed 33 | 0.7738 (5060, transformers 5.16.1) | 0.7677 | −0.0061 |
+| lora 5% seed 21 | 0.7625 (5060, transformers 5.16.1) | 0.7693 | +0.0068 |
+| lora 5% seed 33 | 0.7703 (5060, transformers 5.16.1) | 0.7683 | −0.0020 |
+
+These are not identical re-runs: GPU, `transformers` (5.15/5.16 → 4.54.1), `peft`
+(0.20 → 0.14) and, for the 5060 runs, `torch` (2.13 → 2.11) all changed. Single-run test
+macro-F1 moved by up to 0.0068, the same size as the method gaps.
+
+All three replaced pairs moved toward LoRA (LoRA − full: 1% seed 42 −0.0013 → +0.0055;
+5% seed 21 −0.0082 → −0.0053; 5% seed 33 −0.0035 → +0.0006). With three pairs this happens
+by chance one time in four, but it shifts the mean gaps, so both versions are reported:
+
+| Fraction | Delivered grid: gap, 95% CI, p | With originals substituted: gap, 95% CI, p |
+|---|---|---|
+| 0.01 | +0.0010 [−0.0054, +0.0074], 0.685 | −0.0004 [−0.0060, +0.0053], 0.871 |
+| 0.05 | +0.0024 [−0.0076, +0.0123], 0.547 | +0.0009 [−0.0104, +0.0123], 0.827 |
+
+The conclusion is the same in both: no measurable difference. The calibration, convergence
+and agreement results use per-example logits, which exist only for the delivered runs.
+
 ---
 
 ## What NOT to claim from these runs
 
 - ~~Any test-set claim at 25%, 50% or 100% of the data~~: only 1%, 5% and 10% exist.
-- ~~"LoRA and full fine-tuning are equivalent at every data size"~~: equivalence at
-  ±0.0068 fails at 5%. "No measurable difference" holds at all three.
+- ~~"LoRA and full fine-tuning are statistically equivalent"~~: no margin was
+  pre-specified, so no TOST claim is valid. "No measurable difference" holds at all three
+  fractions, in both the delivered and the substituted grid.
+- ~~"Every gap is below the reproducibility floor"~~: the ±0.0068 "floor" came from
+  runs that changed GPU and library version, not from identical re-runs.
 - ~~"LoRA trains faster"~~ as a general claim: true on a T4, false on an A100, and the two
   GPUs also differ in library version.
 - ~~"LoRA is more stable across seeds"~~: the direction of the standard-deviation
@@ -247,6 +290,7 @@ cancel out to the same score.
 | Dev score at restored checkpoint vs curve | `max abs(dev_reload_drift) = 0.0` across all 30 |
 | Saved-model reload, test logits | `reload_max_logit_drift = 0.0` on all 16 A100 runs (not recorded for T4 runs) |
 | (fraction, seed) pairs split across GPUs | 0 |
+| Replaced runs | 6 second-pass runs replaced by A100 re-runs; originals in `superseded_runs.csv`, sensitivity check above |
 
 ---
 

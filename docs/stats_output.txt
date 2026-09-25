@@ -6,10 +6,25 @@ NVIDIA A100-SXM4-40GB  4.54.1        0.14.0  fp16         16
 Tesla T4               5.15.0        0.20.0  fp16         14
 (fraction, seed) pairs split across GPUs: 0
 
-=== test macro-F1 (TOST margin +/-0.0068) ===
-0.01  full 0.7172 (sd 0.0034)  lora 0.7183 (sd 0.0080)  gap +0.0010  95% CI [-0.0054, +0.0074]  p=0.685  90% CI [-0.0039, +0.0059]  TOST EQUIVALENT  (smallest margin that passes: 0.0059)
-0.05  full 0.7683 (sd 0.0072)  lora 0.7706 (sd 0.0019)  gap +0.0024  95% CI [-0.0076, +0.0123]  p=0.547  90% CI [-0.0053, +0.0100]  TOST not shown  (smallest margin that passes: 0.0100)
-0.1   full 0.7842 (sd 0.0027)  lora 0.7851 (sd 0.0044)  gap +0.0010  95% CI [-0.0062, +0.0082]  p=0.728  90% CI [-0.0046, +0.0065]  TOST EQUIVALENT  (smallest margin that passes: 0.0065)
+=== test macro-F1 ===
+0.01  full 0.7172 (sd 0.0034)  lora 0.7183 (sd 0.0080)  gap +0.0010  95% CI [-0.0054, +0.0074]  p=0.685  90% CI [-0.0039, +0.0059]  smallest supported margin 0.0059
+0.05  full 0.7683 (sd 0.0072)  lora 0.7706 (sd 0.0019)  gap +0.0024  95% CI [-0.0076, +0.0123]  p=0.547  90% CI [-0.0053, +0.0100]  smallest supported margin 0.0100
+0.1   full 0.7842 (sd 0.0027)  lora 0.7851 (sd 0.0044)  gap +0.0010  95% CI [-0.0062, +0.0082]  p=0.728  90% CI [-0.0046, +0.0065]  smallest supported margin 0.0065
+
+=== replacement check: superseded run vs its A100 re-run (test macro-F1) ===
+full_ft_frac0.01_seed42    Tesla T4  (transformers 5.15.0) 0.7235 -> A100 0.7170  diff -0.0065
+lora_frac0.01_seed42       Tesla T4  (transformers 5.15.0) 0.7222 -> A100 0.7225  diff +0.0003
+full_ft_frac0.05_seed21    RTX 5060  (transformers 5.16.1) 0.7707 -> A100 0.7746  diff +0.0039
+full_ft_frac0.05_seed33    RTX 5060  (transformers 5.16.1) 0.7738 -> A100 0.7677  diff -0.0061
+lora_frac0.05_seed21       RTX 5060  (transformers 5.16.1) 0.7625 -> A100 0.7693  diff +0.0068
+lora_frac0.05_seed33       RTX 5060  (transformers 5.16.1) 0.7703 -> A100 0.7683  diff -0.0020
+pair gaps (LoRA - full), superseded vs delivered:
+  0.01  seed 42  -0.0013 -> +0.0055
+  0.05  seed 21  -0.0082 -> -0.0053
+  0.05  seed 33  -0.0035 -> +0.0006
+macro-F1 comparison with the superseded runs substituted back:
+  0.01  full 0.7186  lora 0.7182  gap -0.0004  95% CI [-0.0060, +0.0053]  p=0.871  90% CI [-0.0047, +0.0040]  smallest supported margin 0.0047
+  0.05  full 0.7687  lora 0.7697  gap +0.0009  95% CI [-0.0104, +0.0123]  p=0.827  90% CI [-0.0077, +0.0096]  smallest supported margin 0.0096
 
 === per-seed McNemar on accuracy, Holm-corrected over all pairs ===
 0.01  seed 7   full-only right  357  lora-only right  342  p=0.5965  holm=1.0000

@@ -3,10 +3,15 @@
 Standalone: needs only numpy, pandas, scipy, scikit-learn and matplotlib, no GPU.
 
     python scripts/step12_paper_stats.py                      # uses ./step10_artifacts
-    python scripts/step12_paper_stats.py --artifacts DIR --figures DIR --margin 0.0068
+    python scripts/step12_paper_stats.py --artifacts DIR --figures DIR --margin 0.01
+
+No equivalence margin was fixed before the data were collected, so TOST is only run
+when --margin is given. Without it, the script reports the smallest margin the data
+would support (the larger |bound| of the 90% CI), which is descriptive, not a test.
 
 Reads runs/*.json (manifests), preds/*_test.npz (test logits + labels) and
-curves_v2/*.json (per-epoch dev curves). Prints each table and writes the README
+curves_v2/*.json (per-epoch dev curves), plus superseded_runs.csv (the six second-pass
+runs that the A100 re-runs replaced) for the replacement sensitivity check. Prints each table and writes the README
 figures. Only TEST logits were saved during training, so temperature scaling here is
 cross-fitted on the test set (fit T on one half, score ECE on the other, swap and
 average). It is a sensitivity check, not a dev-fitted calibration result.
@@ -86,6 +91,45 @@ def mcnemar_exact(right_a, right_b):
     return b, c, stats.binomtest(b, b + c, 0.5).pvalue if b + c else 1.0
 
 
+def gap_line(d, margin=None):
+    lo, hi = paired_t_ci(d)
+    lo90, hi90 = paired_t_ci(d, 0.90)
+    out = (f"gap {d.mean():+.4f}  95% CI [{lo:+.4f}, {hi:+.4f}]  "
+           f"p={stats.ttest_rel(d, np.zeros(len(d))).pvalue:.3f}  "
+           f"90% CI [{lo90:+.4f}, {hi90:+.4f}]  "
+           f"smallest supported margin {max(-lo90, hi90):.4f}")
+    if margin:
+        out += f"  TOST {'EQUIVALENT' if lo90 > -margin and hi90 < margin else 'not shown'}"
+    return out
+
+
+def sensitivity(art, wide, margin):
+    """Re-run the macro-F1 comparison with the six superseded second-pass runs in
+    place of their A100 replacements. Only test macro-F1 survives for those runs (no
+    logits), so this covers the accuracy table only."""
+    path = f"{art}/superseded_runs.csv"
+    if not os.path.exists(path):
+        return
+    old = pd.read_csv(path)
+    print("\n=== replacement check: superseded run vs its A100 re-run (test macro-F1) ===")
+    alt = wide["f1"].copy()
+    for _, r in old.iterrows():
+        new = alt.loc[(r.fraction, r.seed), r.method]
+        print(f"{r.run_id:26s} {r.gpu:9s} (transformers {r.transformers}) {r.test_f1_macro:.4f}"
+              f" -> A100 {new:.4f}  diff {new - r.test_f1_macro:+.4f}")
+        alt.loc[(r.fraction, r.seed), r.method] = r.test_f1_macro
+    print("pair gaps (LoRA - full), superseded vs delivered:")
+    for (f, s), g in old.groupby(["fraction", "seed"]):
+        before = alt.loc[(f, s), "lora"] - alt.loc[(f, s), "full_ft"]
+        after = wide.loc[(f, s), ("f1", "lora")] - wide.loc[(f, s), ("f1", "full_ft")]
+        print(f"  {f:<5g} seed {s:<3} {before:+.4f} -> {after:+.4f}")
+    print("macro-F1 comparison with the superseded runs substituted back:")
+    for f in sorted(old.fraction.unique()):
+        d = alt.loc[f, "lora"] - alt.loc[f, "full_ft"]
+        print(f"  {f:<5g} full {alt.loc[f, 'full_ft'].mean():.4f}  lora "
+              f"{alt.loc[f, 'lora'].mean():.4f}  " + gap_line(d, margin))
+
+
 def load(art, run_id):
     f = np.load(f"{art}/preds/{run_id}_test.npz")
     return f["logits"].astype(np.float64), f["labels"]
@@ -95,9 +139,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--artifacts", default="step10_artifacts")
     ap.add_argument("--figures", default="figures")
-    ap.add_argument("--margin", type=float, default=0.0068,
-                    help="TOST equivalence margin on macro-F1 (default: the "
-                         "reproducibility floor quoted in the README)")
+    ap.add_argument("--margin", type=float, default=None,
+                    help="TOST equivalence margin on macro-F1. Must be justified "
+                         "independently of these results; none is by default.")
     args = ap.parse_args()
     art = args.artifacts
 
@@ -129,18 +173,14 @@ def main():
     print(f"(fraction, seed) pairs split across GPUs: {int((split > 1).sum())}")
 
     # ---- accuracy + TOST -----------------------------------------------------
-    print(f"\n=== test macro-F1 (TOST margin +/-{args.margin}) ===")
+    print("\n=== test macro-F1"
+          + (f" (TOST margin +/-{args.margin})" if args.margin else "") + " ===")
     for f in fractions:
         a, b = wide.loc[f, ("f1", "full_ft")], wide.loc[f, ("f1", "lora")]
-        d = b - a
-        lo, hi = paired_t_ci(d)
-        lo90, hi90 = paired_t_ci(d, 0.90)
-        equiv = lo90 > -args.margin and hi90 < args.margin
         print(f"{f:<5g} full {a.mean():.4f} (sd {a.std():.4f})  lora {b.mean():.4f} "
-              f"(sd {b.std():.4f})  gap {d.mean():+.4f}  95% CI [{lo:+.4f}, {hi:+.4f}]  "
-              f"p={stats.ttest_rel(b, a).pvalue:.3f}  90% CI [{lo90:+.4f}, {hi90:+.4f}]  "
-              f"TOST {'EQUIVALENT' if equiv else 'not shown'}  "
-              f"(smallest margin that passes: {max(-lo90, hi90):.4f})")
+              f"(sd {b.std():.4f})  " + gap_line(b - a, args.margin))
+
+    sensitivity(art, wide, args.margin)
 
     # ---- per-seed McNemar with Holm -----------------------------------------
     print("\n=== per-seed McNemar on accuracy, Holm-corrected over all pairs ===")
