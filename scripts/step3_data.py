@@ -1,7 +1,8 @@
 # ---- STEP 3: dataset + metrics (train, validation AND test) ----
-# Identical preprocessing to your first notebook: same normalizer, same tokenizer,
+# Identical preprocessing to the first-pass notebook: same normalizer, same tokenizer,
 # max_length=128, padding to max_length. The test split is tokenized here too,
-# because Step 10 scores it inside every run. Takes a few minutes the first time,
+# because Step 10 scores it inside every run. Imported by
+# scripts/step10_train_with_test.py when it runs outside the notebook. Takes a few minutes the first time,
 # then it is cached under the HuggingFace cache folder.
 from datasets import load_dataset
 from transformers import AutoTokenizer

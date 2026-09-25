@@ -1,12 +1,22 @@
-# Pinned to the second-pass run set (T4 + 5060). See docs/THESIS_MASTER_CONTEXT.md §5.1.
+# Two library stacks produced the 30 delivered runs (read from the run manifests):
+#   Tesla T4   (14 runs): torch 2.11.0, transformers 5.15.0, peft 0.20.0
+#   A100-40GB  (16 runs): torch 2.11.0, transformers 4.54.1, peft 0.14.0
+# Every (fraction, seed) pair ran on one machine, so paired comparisons never mix
+# stacks. The pins below are the A100 stack, which the notebook installs.
 torch>=2.11
-transformers>=5.15
-peft>=0.20.0
+transformers>=4.44,<4.55
+peft>=0.11,<0.15
 torchao          # peft's version check crashes without this
-datasets
-evaluate
-accelerate
+datasets>=2.19,<3.5
+evaluate>=0.4.1
+accelerate>=0.30,<1.5
 numpy
 pandas
-# csebuetnlp normalizer — install from git per the notebook:
+scipy>=1.11
+scikit-learn>=1.3
+matplotlib
+# csebuetnlp normalizer (not on PyPI):
 #   pip install git+https://github.com/csebuetnlp/normalizer
+#
+# Analysis only (scripts/step11_analysis.py, scripts/step12_paper_stats.py) needs
+# just numpy, pandas, scipy, scikit-learn and matplotlib, no GPU.

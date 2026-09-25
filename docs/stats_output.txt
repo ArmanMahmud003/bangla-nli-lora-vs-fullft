@@ -1,0 +1,63 @@
+30 runs, fractions [np.float64(0.01), np.float64(0.05), np.float64(0.1)], seeds [np.int64(7), np.int64(13), np.int64(21), np.int64(33), np.int64(42)]
+
+runs per GPU and library version:
+gpu                    transformers  peft    precision
+NVIDIA A100-SXM4-40GB  4.54.1        0.14.0  fp16         16
+Tesla T4               5.15.0        0.20.0  fp16         14
+(fraction, seed) pairs split across GPUs: 0
+
+=== test macro-F1 (TOST margin +/-0.0068) ===
+0.01  full 0.7172 (sd 0.0034)  lora 0.7183 (sd 0.0080)  gap +0.0010  95% CI [-0.0054, +0.0074]  p=0.685  90% CI [-0.0039, +0.0059]  TOST EQUIVALENT  (smallest margin that passes: 0.0059)
+0.05  full 0.7683 (sd 0.0072)  lora 0.7706 (sd 0.0019)  gap +0.0024  95% CI [-0.0076, +0.0123]  p=0.547  90% CI [-0.0053, +0.0100]  TOST not shown  (smallest margin that passes: 0.0100)
+0.1   full 0.7842 (sd 0.0027)  lora 0.7851 (sd 0.0044)  gap +0.0010  95% CI [-0.0062, +0.0082]  p=0.728  90% CI [-0.0046, +0.0065]  TOST EQUIVALENT  (smallest margin that passes: 0.0065)
+
+=== per-seed McNemar on accuracy, Holm-corrected over all pairs ===
+0.01  seed 7   full-only right  357  lora-only right  342  p=0.5965  holm=1.0000
+0.01  seed 13  full-only right  309  lora-only right  330  p=0.4289  holm=1.0000
+0.01  seed 21  full-only right  362  lora-only right  332  p=0.2710  holm=1.0000
+0.01  seed 33  full-only right  361  lora-only right  388  p=0.3421  holm=1.0000
+0.01  seed 42  full-only right  314  lora-only right  336  p=0.4101  holm=1.0000
+0.05  seed 7   full-only right  290  lora-only right  272  p=0.4733  holm=1.0000
+0.05  seed 13  full-only right  271  lora-only right  299  p=0.2581  holm=1.0000
+0.05  seed 21  full-only right  280  lora-only right  251  p=0.2243  holm=1.0000
+0.05  seed 33  full-only right  316  lora-only right  322  p=0.8431  holm=1.0000
+0.05  seed 42  full-only right  263  lora-only right  325  p=0.0118  holm=0.1773  <- p<0.05
+0.1   seed 7   full-only right  305  lora-only right  344  p=0.1357  holm=1.0000
+0.1   seed 13  full-only right  257  lora-only right  270  p=0.6012  holm=1.0000
+0.1   seed 21  full-only right  311  lora-only right  283  p=0.2679  holm=1.0000
+0.1   seed 33  full-only right  281  lora-only right  264  p=0.4931  holm=1.0000
+0.1   seed 42  full-only right  269  lora-only right  292  p=0.3530  holm=1.0000
+1 of 15 raw p<0.05; 0 survive Holm
+
+=== prediction agreement (same seed) ===
+           agree     b     c
+fraction                    
+0.01      0.8386  1703  1728
+0.05      0.8661  1420  1469
+0.10      0.8686  1423  1453
+
+=== calibration: ECE (15 bins), paired over seeds ===
+0.01  full 0.245 (sd 0.009)  lora 0.117 (sd 0.009)  dECE -0.128  p=4.7e-06  t-CI [-0.139, -0.117]  seed-bootstrap CI [-0.135, -0.122]  dz=-15.0  seeds LoRA better 5/5
+      mean confidence full 0.960 / lora 0.834 at accuracy 0.716 / 0.717
+      after cross-fitted temperature scaling: full 0.054  lora 0.027  dECE -0.027  t-CI [-0.043, -0.011]
+0.05  full 0.102 (sd 0.070)  lora 0.079 (sd 0.006)  dECE -0.023  p=0.48  t-CI [-0.103, +0.058]  seed-bootstrap CI [-0.073, +0.027]  dz=-0.4  seeds LoRA better 3/5
+      mean confidence full 0.867 / lora 0.848 at accuracy 0.768 / 0.770
+      after cross-fitted temperature scaling: full 0.036  lora 0.019  dECE -0.017  t-CI [-0.033, -0.001]
+0.1   full 0.120 (sd 0.062)  lora 0.052 (sd 0.014)  dECE -0.067  p=0.085  t-CI [-0.150, +0.015]  seed-bootstrap CI [-0.119, -0.016]  dz=-1.0  seeds LoRA better 4/5
+      mean confidence full 0.903 / lora 0.834 at accuracy 0.784 / 0.785
+      after cross-fitted temperature scaling: full 0.030  lora 0.018  dECE -0.011  t-CI [-0.022, -0.001]
+
+=== best (dev-selected) epoch ===
+0.01  full [5, 5, 7, 8, 8] (mean 6.6)  lora [7, 8, 8, 8, 8] (mean 7.8)  paired gap +1.2  LoRA later in 3/5  p=0.1087  ceiling hit full 2/5, lora 4/5
+0.05  full [1, 2, 2, 3, 4] (mean 2.4)  lora [6, 6, 7, 7, 8] (mean 6.8)  paired gap +4.4  LoRA later in 5/5  p=0.0001  ceiling hit full 0/5, lora 1/5
+0.1   full [1, 2, 2, 4, 6] (mean 3.0)  lora [3, 4, 5, 6, 6] (mean 4.8)  paired gap +1.8  LoRA later in 3/5  p=0.2205  ceiling hit full 0/5, lora 0/5
+
+=== efficiency by GPU ===
+                               runs  trainable  model_mb  peak_mb  samples_per_s
+gpu                   method                                                    
+NVIDIA A100-SXM4-40GB full_ft     8  110619651     442.5   2711.7          268.4
+                      lora        8     887811       3.6   1569.9          253.1
+Tesla T4              full_ft     7  110619651     442.5   2418.2           89.5
+                      lora        7     887811       3.6   1804.6          156.2
+
+wrote figures/f1_and_ece.png and figures/dev_curves.png
