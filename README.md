@@ -1,6 +1,6 @@
 # Bangla NLI — LoRA vs Full Fine-tuning
 
-**MSc thesis code and results.** A matched-budget comparison of LoRA (Low-Rank
+**BSc thesis code and results.** A matched-budget comparison of LoRA (Low-Rank
 Adaptation) against full fine-tuning of [BanglaBERT](https://huggingface.co/csebuetnlp/banglabert)
 on the [XNLI-BN](https://huggingface.co/datasets/csebuetnlp/xnli_bn) 3-class natural language
 inference task, run at 1%, 5%, and 10% of the training data with five random seeds per cell
